@@ -1,8 +1,10 @@
-import mongoose from "mongoose";
+import mongoose from "mongoose"
+require("dotenv").config();
 
 export default async () => {
-    return mongoose.connect(process.env.MONGO_URL, {
+    return mongoose.connect( process.env.MONGODB_URI , {
         useNewUrlParser: true,
-        useUnifiedTopology: true,
-    });
+        useUnifiedTopology: true,  
+        
+    })
 };

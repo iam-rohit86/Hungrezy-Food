@@ -10,33 +10,22 @@ const Router = express.Router();
 
 /*
 Route   /signup
-Des     Signup with email and password
+Des     Register new User
 Params  none
 Access  Public
 Method  POST
 */
 
-Router.post("/signup", async(req, res) => {
-    try {
-       const { email, password, fullname, phoneNumber } = req.body.credentials;
-       
+Router.post("/signup", async (req, res) => {
+    try {     
     //    check whether the email exist
-    const checkUserByEmail = await UserModel.findOne({ email });
-    const checkUserByPhone = await UserModel.findOne({ phoneNumber });
-    if (checkUserByEmail || checkUserByPhone){
-        return res.json({error: "User already exist!"});
-    }
-    // hash password
-    const bcryptSalt = await bcrypt.genSalt(8);
-
-    const hashedPassword = await bcrypt.hash(password, bcryptSalt);
+    await UserModel.findByEmailAndPhone(req.body.credentials);
 
     // save to database
-    await UserModel.create({ ...req.body.credentials, password: hashedPassword});
+    const newUser = await UserModel.create(req.body.credentials);
 
     // generate JWT auth token
-    const token = jwt.sign({ user: { fullname, email } } , "Hungrezy");
-    
+    const token = newUser.generateJwtToken();
 
     // return
     return res.status(200).json({ token , status: "success" });
@@ -44,4 +33,12 @@ Router.post("/signup", async(req, res) => {
         return res.status(500).json({ error: error.message});
     }
 });
+
+/*
+Route   /signin
+Des     Signin with email and password
+Params  none
+Access  Public
+Method  POST
+*/
 export default Router;
